@@ -1,28 +1,3 @@
-#Security group VPCA
-resource "aws_security_group" "vpca" {
-  name        = "vpca"
-  description = "allow SSH,ICMP"
-  vpc_id      = aws_vpc.vpca.id
-}
-resource "aws_vpc_security_group_ingress_rule" "allow_vpca" {
-  security_group_id = aws_security_group.vpca.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = 22
-  to_port           = 22
-  ip_protocol       = "tcp"
-}
-resource "aws_vpc_security_group_ingress_rule" "allow_icmp_vpca" {
-  security_group_id = aws_security_group.vpca.id
-  cidr_ipv4         = "0.0.0.0/0"
-  from_port         = -1
-  to_port           = -1
-  ip_protocol       = "icmp"
-}
-resource "aws_vpc_security_group_egress_rule" "egress_ssh_all_vpca" {
-  security_group_id = aws_security_group.vpca.id
-  cidr_ipv4         = "0.0.0.0/0"
-  ip_protocol       = "-1"
-}
 #SG LBA
 resource "aws_security_group" "lba" {
   name        = "lba_web"
@@ -46,22 +21,80 @@ resource "aws_vpc_security_group_egress_rule" "lba_egress_all" {
   ip_protocol       = "-1"
 }
 
+#Security group VPCA
+resource "aws_security_group" "vpca" {
+  name        = "vpca"
+  description = "allow SSH,ICMP"
+  vpc_id      = aws_vpc.vpca.id
+}
+resource "aws_vpc_security_group_ingress_rule" "web_443_allow_vpca" {
+  security_group_id            = aws_security_group.vpca.id
+  referenced_security_group_id = aws_security_group.lba.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+}
+resource "aws_vpc_security_group_ingress_rule" "web_80_allow_vpca" {
+  security_group_id            = aws_security_group.vpca.id
+  referenced_security_group_id = aws_security_group.lba.id
+  from_port                    = 80
+  to_port                      = 80
+  ip_protocol                  = "tcp"
+}
+resource "aws_vpc_security_group_ingress_rule" "allow_vpca" {
+  for_each          = toset(local.allowed_cidrs_VPCA)
+  security_group_id = aws_security_group.vpca.id
+  cidr_ipv4         = each.value
+  from_port         = 22
+  to_port           = 22
+  ip_protocol       = "tcp"
+}
+resource "aws_vpc_security_group_ingress_rule" "allow_icmp_vpca" {
+  for_each          = toset(local.allowed_cidrs_VPCA)
+  security_group_id = aws_security_group.vpca.id
+  cidr_ipv4         = each.value
+  from_port         = -1
+  to_port           = -1
+  ip_protocol       = "icmp"
+}
+resource "aws_vpc_security_group_egress_rule" "egress_all_vpca" {
+  security_group_id = aws_security_group.vpca.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1"
+}
+
 #Security group VPCB
 resource "aws_security_group" "vpcb" {
   name        = "vpcb"
   description = "allow SSH,ICMP"
   vpc_id      = aws_vpc.vpcb.id
 }
+resource "aws_vpc_security_group_ingress_rule" "web_443_allow_vpcb" {
+  security_group_id            = aws_security_group.vpcb.id
+  referenced_security_group_id = aws_security_group.lba.id
+  from_port                    = 443
+  to_port                      = 443
+  ip_protocol                  = "tcp"
+}
+resource "aws_vpc_security_group_ingress_rule" "web_80_allow_vpcb" {
+  security_group_id            = aws_security_group.vpcb.id
+  referenced_security_group_id = aws_security_group.lba.id
+  from_port                    = 80
+  to_port                      = 80
+  ip_protocol                  = "tcp"
+}
 resource "aws_vpc_security_group_ingress_rule" "allow_vpcb" {
+  for_each          = toset(local.allowed_cidrs_VPCB)
   security_group_id = aws_security_group.vpcb.id
-  cidr_ipv4         = "0.0.0.0/0"
+  cidr_ipv4         = each.value
   from_port         = 22
   to_port           = 22
   ip_protocol       = "tcp"
 }
 resource "aws_vpc_security_group_ingress_rule" "allow_icmp_vpcb" {
+  for_each          = toset(local.allowed_cidrs_VPCB)
   security_group_id = aws_security_group.vpcb.id
-  cidr_ipv4         = "0.0.0.0/0"
+  cidr_ipv4         = each.value
   from_port         = -1
   to_port           = -1
   ip_protocol       = "icmp"
@@ -78,15 +111,17 @@ resource "aws_security_group" "vpcc" {
   vpc_id      = aws_vpc.vpcc.id
 }
 resource "aws_vpc_security_group_ingress_rule" "allow_vpcc" {
+  for_each          = toset(local.allowed_cidrs_VPCC)
   security_group_id = aws_security_group.vpcc.id
-  cidr_ipv4         = "0.0.0.0/0"
+  cidr_ipv4         = each.value
   from_port         = 22
   to_port           = 22
   ip_protocol       = "tcp"
 }
 resource "aws_vpc_security_group_ingress_rule" "allow_icmp_vpcc" {
+  for_each          = toset(local.allowed_cidrs_VPCC)
   security_group_id = aws_security_group.vpcc.id
-  cidr_ipv4         = "0.0.0.0/0"
+  cidr_ipv4         = each.value
   from_port         = -1
   to_port           = -1
   ip_protocol       = "icmp"
@@ -104,7 +139,7 @@ resource "aws_security_group" "db" {
   vpc_id      = aws_vpc.vpcb.id
 
   ingress {
-    description = "Allow MySQL from EKS private subnets"
+    description = "Allow MySQL from subnets"
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
@@ -118,7 +153,7 @@ resource "aws_security_group" "db" {
 #SG Secrets Manager Endpoint
 resource "aws_security_group" "secrets_manager" {
   name        = "secrets_manager"
-  description = "allow app traffic to secrets_manager"
+  description = "allow app traffic to secrets manager"
   vpc_id      = aws_vpc.vpca.id
 }
 resource "aws_vpc_security_group_ingress_rule" "secrets_manager_app_allow_443" {
