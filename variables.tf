@@ -35,3 +35,5 @@ variable "amazon_linux_2023" {
   description = "Amazon Linux 2023"
   default     = "ami-05576a079321f21f8"
 }
+
+data "aws_caller_identity" "current" {}

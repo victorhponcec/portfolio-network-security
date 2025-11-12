@@ -9,25 +9,25 @@ resource "aws_customer_gateway" "cgw" {
 
 resource "aws_vpn_connection" "vpn" {
   customer_gateway_id = aws_customer_gateway.cgw.id
-  transit_gateway_id  = aws_ec2_transit_gateway.tgw.id #AWS will automatically create a Transit Gateway VPN Attachment
+  transit_gateway_id  = aws_ec2_transit_gateway.tgw.id #automatically creates a TGW VPN Attachment
   type                = aws_customer_gateway.cgw.type
-  static_routes_only  = true #false=BGP | true=static routes
+  static_routes_only  = false #false=BGP | true=static routes
   tags                = { Name = "site-to-site-vpn" }
 
-  #check tunnel options: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_VpnTunnelOptionsSpecification.html
+  # tunnel options: https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_VpnTunnelOptionsSpecification.html
   # --- Tunnel 1 Configuration ---
   tunnel1_preshared_key = random_password.vpn.result
   tunnel1_inside_cidr   = "169.254.10.0/30" # Must be a /30 from 169.254.0.0/16 and unique across tunnels
 
   tunnel1_phase1_encryption_algorithms = ["AES256"]
   tunnel1_phase1_integrity_algorithms  = ["SHA2-256"]
-  tunnel1_phase1_dh_group_numbers      = [14]  # Group 14 (MODP-2048) is common
-  tunnel1_phase1_lifetime_seconds      = 28800 # 8 hours (default)
+  tunnel1_phase1_dh_group_numbers      = [14]  
+  tunnel1_phase1_lifetime_seconds      = 28800 # 8 hours default
 
   tunnel1_phase2_encryption_algorithms = ["AES256"]
   tunnel1_phase2_integrity_algorithms  = ["SHA2-256"]
-  tunnel1_phase2_dh_group_numbers      = [14] # Group 14 (MODP-2048) is common
-  tunnel1_phase2_lifetime_seconds      = 3600 # 1 hour (default)
+  tunnel1_phase2_dh_group_numbers      = [14] 
+  tunnel1_phase2_lifetime_seconds      = 3600 # 1 hour default
 
   tunnel1_ike_versions   = ["ikev2"]
   tunnel1_startup_action = "start" # Can be "start" or "add"
@@ -53,6 +53,7 @@ resource "aws_vpn_connection" "vpn" {
   # These define the CIDR blocks that are allowed to communicate over the VPN tunnels.
   # If not specified, defaults to 0.0.0.0/0
   #local_ipv4_network_cidr  = "10.0.0.0/16"    # VPC CIDR | not necessary when using TGW
+
   remote_ipv4_network_cidr = var.on-prem-cidr # on-premises network CIDR
 }
 
@@ -65,7 +66,7 @@ output "vpn_connection_id" {
 output "customer_gateway_configuration" {
   description = "Config file for customer gateway (XML)"
   value       = aws_vpn_connection.vpn.customer_gateway_configuration
-  sensitive   = true # Mark as sensitive as it might contain keys/IPs
+  sensitive   = true # mark as sensitive = contains keys/IPs
 }
 
 /* delete this | aws_vpn_connection_route used when: The VPN is attached to a Virtual Private Gateway 
