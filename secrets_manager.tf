@@ -1,4 +1,4 @@
-/*
+
 resource "aws_secretsmanager_secret" "db_password" {
   name        = "db-password-v8"
   description = "Database Password"
@@ -11,7 +11,7 @@ resource "aws_secretsmanager_secret_version" "db_password_v1" {
     password = random_password.db.result
   })
 }
-*/
+
 
 /*
 resource "aws_secretsmanager_secret" "vpn_password" {

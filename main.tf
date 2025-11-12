@@ -23,33 +23,38 @@ resource "aws_vpc" "vpcc" {
   tags       = { Name = "VPCC" }
 }
 
-#Subnet Public
+#Subnets
 resource "aws_subnet" "public_subnet_vpca" {
   vpc_id            = aws_vpc.vpca.id
   cidr_block        = "10.111.1.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = var.az1
   tags              = { Name = "vpcA-public-1" }
+}
+resource "aws_subnet" "public_subnet_b_vpca" {
+  vpc_id            = aws_vpc.vpca.id
+  cidr_block        = "10.111.2.0/24"
+  availability_zone = var.az2
+  tags              = { Name = "vpcA-public-2" }
 }
 resource "aws_subnet" "private_subnet_vpcb" {
   vpc_id            = aws_vpc.vpcb.id
   cidr_block        = "10.112.1.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = var.az1
   tags              = { Name = "vpcB-private-1" }
 }
 resource "aws_subnet" "private_subnet_b_vpcb" {
   vpc_id            = aws_vpc.vpcb.id
   cidr_block        = "10.112.2.0/24"
-  availability_zone = "us-east-1b"
-  tags              = { Name = "vpcB-private-1" }
+  availability_zone = var.az2
+  tags              = { Name = "vpcB-private-2" }
 }
 resource "aws_subnet" "private_subnet_vpcc" {
   vpc_id            = aws_vpc.vpcc.id
   cidr_block        = "10.113.1.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = var.az1
   tags              = { Name = "vpcC-private-1" }
 }
 
-#Internet Gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpca.id
 }
@@ -104,9 +109,17 @@ resource "aws_route_table_association" "public_vpca" {
   subnet_id      = aws_subnet.public_subnet_vpca.id
   route_table_id = aws_route_table.public_rtb_vpca.id
 }
+resource "aws_route_table_association" "public_vpca_b" { #check deployment
+  subnet_id      = aws_subnet.public_subnet_b_vpca.id
+  route_table_id = aws_route_table.public_rtb_vpca.id
+}
 #Associate private Subnet to public route table - VPCB
 resource "aws_route_table_association" "public_vpcb" {
   subnet_id      = aws_subnet.private_subnet_vpcb.id
+  route_table_id = aws_route_table.public_rtb_vpcb.id
+}
+resource "aws_route_table_association" "public_vpcb_b" { # check deployment
+  subnet_id      = aws_subnet.private_subnet_b_vpcb.id
   route_table_id = aws_route_table.public_rtb_vpcb.id
 }
 #Associate private Subnet to public route table - VPCB

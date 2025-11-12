@@ -21,12 +21,12 @@ resource "aws_vpn_connection" "vpn" {
 
   tunnel1_phase1_encryption_algorithms = ["AES256"]
   tunnel1_phase1_integrity_algorithms  = ["SHA2-256"]
-  tunnel1_phase1_dh_group_numbers      = [14]  
+  tunnel1_phase1_dh_group_numbers      = [14]
   tunnel1_phase1_lifetime_seconds      = 28800 # 8 hours default
 
   tunnel1_phase2_encryption_algorithms = ["AES256"]
   tunnel1_phase2_integrity_algorithms  = ["SHA2-256"]
-  tunnel1_phase2_dh_group_numbers      = [14] 
+  tunnel1_phase2_dh_group_numbers      = [14]
   tunnel1_phase2_lifetime_seconds      = 3600 # 1 hour default
 
   tunnel1_ike_versions   = ["ikev2"]

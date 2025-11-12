@@ -1,4 +1,3 @@
-/*
 #Enable SSM on EC2
 resource "aws_iam_role" "ssm_role" {
   name = "ssm_role"
@@ -73,7 +72,7 @@ resource "aws_iam_instance_profile" "ssm_secrets_manager_profile" {
   name = "SSMInstanceProfile-app"
   role = aws_iam_role.ssm_secrets_manager_role.name
 }
-*/
+
 
 #Role for EventBridge: Allow EB to public SNS topics
 resource "aws_iam_role" "eventbridge_to_sns" {
