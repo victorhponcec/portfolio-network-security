@@ -50,7 +50,7 @@ resource "aws_vpn_connection" "vpn" {
   tunnel2_startup_action = "start"
 
   # Optional: Local and Remote Network CIDRs
-  # These define the CIDR blocks that are allowed to communicate over the VPN tunnels.
+  # define the CIDR blocks that are allowed to communicate over the VPN tunnels
   # If not specified, defaults to 0.0.0.0/0
   #local_ipv4_network_cidr  = "10.0.0.0/16"    # VPC CIDR | not necessary when using TGW
 
@@ -69,7 +69,7 @@ output "customer_gateway_configuration" {
   sensitive   = true # mark as sensitive = contains keys/IPs
 }
 
-/* delete this | aws_vpn_connection_route used when: The VPN is attached to a Virtual Private Gateway 
+/* delete | aws_vpn_connection_route used when: VPN is attached to a Virtual Private Gateway 
 #Static route /DELETE IF USING BGP/DYNAMIC
 resource "aws_vpn_connection_route" "onprem_static_route" {
   vpn_connection_id = aws_vpn_connection.vpn.id

@@ -25,16 +25,19 @@ resource "aws_vpc" "vpcc" {
 
 #Subnets
 resource "aws_subnet" "public_subnet_vpca" {
-  vpc_id            = aws_vpc.vpca.id
-  cidr_block        = "10.111.1.0/24"
-  availability_zone = var.az1
-  tags              = { Name = "vpcA-public-1" }
+  vpc_id                  = aws_vpc.vpca.id
+  cidr_block              = "10.111.1.0/24"
+  availability_zone       = var.az1
+  tags                    = { Name = "vpcA-public-1" }
+  map_public_ip_on_launch = false #test true
+
 }
 resource "aws_subnet" "public_subnet_b_vpca" {
-  vpc_id            = aws_vpc.vpca.id
-  cidr_block        = "10.111.2.0/24"
-  availability_zone = var.az2
-  tags              = { Name = "vpcA-public-2" }
+  vpc_id                  = aws_vpc.vpca.id
+  cidr_block              = "10.111.2.0/24"
+  availability_zone       = var.az2
+  tags                    = { Name = "vpcA-public-2" }
+  map_public_ip_on_launch = false #test true
 }
 resource "aws_subnet" "private_subnet_vpcb" {
   vpc_id            = aws_vpc.vpcb.id
@@ -55,8 +58,57 @@ resource "aws_subnet" "private_subnet_vpcc" {
   tags              = { Name = "vpcC-private-1" }
 }
 
+resource "aws_subnet" "private_subnet_web1_vpca" {
+  vpc_id                  = aws_vpc.vpca.id
+  cidr_block              = "10.111.3.0/24"
+  availability_zone       = var.az1
+  map_public_ip_on_launch = false
+  tags                    = { Name = "vpcA-private-1" }
+}
+resource "aws_subnet" "private_subnet_web2_vpca" {
+  vpc_id                  = aws_vpc.vpca.id
+  cidr_block              = "10.111.4.0/24"
+  availability_zone       = var.az2
+  map_public_ip_on_launch = false
+  tags                    = { Name = "vpcA-private-1" }
+}
+
+#IGW + NAT
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpca.id
+}
+resource "aws_eip" "ngw" {
+  domain     = "vpc"
+  depends_on = [aws_internet_gateway.igw]
+}
+resource "aws_eip" "ngw2" {
+  domain     = "vpc"
+  depends_on = [aws_internet_gateway.igw]
+}
+resource "aws_nat_gateway" "ngw" {
+  allocation_id = aws_eip.ngw.id
+  subnet_id     = aws_subnet.public_subnet_vpca.id
+  depends_on    = [aws_internet_gateway.igw]
+}
+resource "aws_nat_gateway" "ngw2" {
+  allocation_id = aws_eip.ngw2.id
+  subnet_id     = aws_subnet.public_subnet_b_vpca.id
+  depends_on    = [aws_internet_gateway.igw]
+}
+
+resource "aws_route_table" "private_nat_rtb" {
+  vpc_id = aws_vpc.vpca.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.ngw.id
+  }
+}
+resource "aws_route_table" "private_nat2_rtb" {
+  vpc_id = aws_vpc.vpca.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.ngw2.id
+  }
 }
 
 #Route Tables
@@ -118,7 +170,7 @@ resource "aws_route_table_association" "public_vpcb" {
   subnet_id      = aws_subnet.private_subnet_vpcb.id
   route_table_id = aws_route_table.public_rtb_vpcb.id
 }
-resource "aws_route_table_association" "public_vpcb_b" { # check deployment
+resource "aws_route_table_association" "public_vpcb_b" {
   subnet_id      = aws_subnet.private_subnet_b_vpcb.id
   route_table_id = aws_route_table.public_rtb_vpcb.id
 }
@@ -126,6 +178,15 @@ resource "aws_route_table_association" "public_vpcb_b" { # check deployment
 resource "aws_route_table_association" "public_vpcc" {
   subnet_id      = aws_subnet.private_subnet_vpcc.id
   route_table_id = aws_route_table.public_rtb_vpcc.id
+}
+#NAT>Private VPCA
+resource "aws_route_table_association" "private_vpca_nat1" {
+  subnet_id      = aws_subnet.private_subnet_web1_vpca.id
+  route_table_id = aws_route_table.private_nat_rtb.id
+}
+resource "aws_route_table_association" "private_vpca_nat2" {
+  subnet_id      = aws_subnet.private_subnet_web2_vpca.id
+  route_table_id = aws_route_table.private_nat2_rtb.id
 }
 
 #SSH

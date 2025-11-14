@@ -70,18 +70,18 @@ resource "aws_security_group" "vpcb" {
   vpc_id      = aws_vpc.vpcb.id
 }
 resource "aws_vpc_security_group_ingress_rule" "web_443_allow_vpcb" {
-  security_group_id            = aws_security_group.vpcb.id
-  referenced_security_group_id = aws_security_group.lba.id
-  from_port                    = 443
-  to_port                      = 443
-  ip_protocol                  = "tcp"
+  security_group_id = aws_security_group.vpcb.id
+  cidr_ipv4         = "10.111.0.0/16"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
 }
 resource "aws_vpc_security_group_ingress_rule" "web_80_allow_vpcb" {
-  security_group_id            = aws_security_group.vpcb.id
-  referenced_security_group_id = aws_security_group.lba.id
-  from_port                    = 80
-  to_port                      = 80
-  ip_protocol                  = "tcp"
+  security_group_id = aws_security_group.vpcb.id
+  cidr_ipv4         = "10.111.0.0/16"
+  from_port         = 80
+  to_port           = 80
+  ip_protocol       = "tcp"
 }
 resource "aws_vpc_security_group_ingress_rule" "allow_vpcb" {
   for_each          = toset(local.allowed_cidrs_VPCB)

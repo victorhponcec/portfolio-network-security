@@ -1,6 +1,7 @@
 resource "random_password" "db" {
-  length  = 14
-  special = true
+  length           = 14
+  special          = false
+  override_special = ".-_"
 }
 
 resource "random_password" "vpn" {

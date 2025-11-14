@@ -1,3 +1,5 @@
+#simulate on-prem infra | just for testing
+
 #VPCA
 resource "aws_vpc" "onprem" {
   cidr_block = "10.222.0.0/16"

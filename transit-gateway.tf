@@ -10,7 +10,12 @@ resource "aws_ec2_transit_gateway" "tgw" {
 
 #Transit Gateway Attachment - Subnets VPCA
 resource "aws_ec2_transit_gateway_vpc_attachment" "subnets_vpca" {
-  subnet_ids         = [aws_subnet.public_subnet_vpca.id]
+  subnet_ids = [
+    aws_subnet.public_subnet_vpca.id,
+    aws_subnet.public_subnet_b_vpca.id,
+    aws_subnet.private_subnet_web1_vpca,
+    aws_subnet.private_subnet_web2_vpca
+  ]
   transit_gateway_id = aws_ec2_transit_gateway.tgw.id
   vpc_id             = aws_vpc.vpca.id
 }
@@ -80,7 +85,7 @@ resource "aws_ec2_transit_gateway_route_table_association" "association_vpn" {
   transit_gateway_route_table_id = aws_ec2_transit_gateway_route_table.tgw_route_table.id
 }
 
-/* UNCOMMENT IF USING BGP | THEN COMMENT aws_ec2_transit_gateway_route.route_to_onprem */
+/* UNCOMMENT IF USING BGP > THEN COMMENT: aws_ec2_transit_gateway_route.route_to_onprem */
 # ---Transit Gateway Propagation - VPN Attachment---
 # This enables BGP route propagation on-premises network to the tgw_route_table
 resource "aws_ec2_transit_gateway_route_table_propagation" "propagation_vpn" {
