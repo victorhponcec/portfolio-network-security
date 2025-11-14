@@ -13,8 +13,8 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "subnets_vpca" {
   subnet_ids = [
     aws_subnet.public_subnet_vpca.id,
     aws_subnet.public_subnet_b_vpca.id,
-    aws_subnet.private_subnet_web1_vpca,
-    aws_subnet.private_subnet_web2_vpca
+    aws_subnet.private_subnet_web1_vpca.id,
+    aws_subnet.private_subnet_web2_vpca.id
   ]
   transit_gateway_id = aws_ec2_transit_gateway.tgw.id
   vpc_id             = aws_vpc.vpca.id
