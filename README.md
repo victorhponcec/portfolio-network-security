@@ -2,7 +2,7 @@
 
 **Author:** Victor Ponce | **Contact:** [Linkedin](https://www.linkedin.com/in/victorhugoponce) | **Website:** [victorponce.com](https://victorponce.com)
 
-**Spanish Version:** [README.es.md](https://github.com/victorhponcec/portfolio-aws-security-1/blob/main/README.es.md)
+**Versión en Español:** [README.es.md](https://github.com/victorhponcec/portfolio-network-security/blob/main/README.es.md)
 
 ## 1. Overview  
 
@@ -36,8 +36,8 @@ The goal of this project is to demonstrate **cloud security engineering skills**
 |----------|----------------|---------------------------|--------------------|
 | VPCA     | 10.111.0.0/16  | vpcA-public-a             | 10.111.1.0/24      |
 | VPCA     | 10.111.0.0/16  | vpcA-public-b             | 10.111.2.0/24      |
-| VPCA     | 10.111.0.0/16  | vpcA-private-web-1        | 10.111.10.0/24     |
-| VPCA     | 10.111.0.0/16  | vpcA-private-web-2        | 10.111.11.0/24     |
+| VPCA     | 10.111.0.0/16  | vpcA-private-web-1        | 10.111.3.0/24     |
+| VPCA     | 10.111.0.0/16  | vpcA-private-web-2        | 10.111.4.0/24     |
 | VPCB     | 10.112.0.0/16  | vpcB-private-a            | 10.112.1.0/24      |
 | VPCB     | 10.112.0.0/16  | vpcB-private-b            | 10.112.2.0/24      |
 | VPCC     | 10.113.0.0/16  | vpcC-private-1            | 10.113.1.0/24      |
@@ -170,6 +170,17 @@ Note that the simulated on-prem environment can be easily replaced and integrate
 - **AWS WAFv2 Web ACL**  
 - **ALB HTTPS** listener  
 
+<div align="center">
+
+| Priority | Rule Name                             | Type               | Action                        | Description                                                                           |
+| -------- | ------------------------------------- | ------------------ | ----------------------------- | ------------------------------------------------------------------------------------- |
+| 1        | AWSManagedRulesCommonRuleSet          | Managed Rule Group | Default                       | Baseline protections against common threats |
+| 2        | RateLimitPerIP                        | Rate-Based Rule    | Block                         | Blocks IPs exceeding 800 requests in 5 minutes (DDoS/brute-force protection)          |
+| 3        | AWSManagedRulesSQLiRuleSet            | Managed Rule Group | Default                       | Detects SQL injection attempts                                                        |
+| 4        | AWSManagedRulesAmazonIpReputationList | Managed Rule Group | Default                       | Detects/block requests from known malicious IPs (AWS threat intelligence)               |
+<p><em>(Table 5 – WAF rules)</em></p>
+</div>
+
 ### Data Security  
 - RDS encrypted  
 - Credentials stored in **Secrets Manager**  
@@ -189,6 +200,7 @@ Note that the simulated on-prem environment can be easily replaced and integrate
 ---
 
 ## 6. Deployed Terraform Resources  
+<div align="center">
 
 | Category | Key Resources |
 |---------|--------------|
@@ -198,6 +210,8 @@ Note that the simulated on-prem environment can be easily replaced and integrate
 | **Identity** | IAM roles, instance profiles, Secrets Manager |
 | **Storage** | S3 buckets, RDS MySQL |
 | **Edge** | CloudFront, ALB, ACM certificates |
+<p><em>(Table 6 – Terraform resources for the AWS Provider)</em></p>
+</div>
 
 ---
 
@@ -222,6 +236,7 @@ terraform plan
 terraform apply
 ```
 
+*replace relevant variables like (domain) in variables.tf
 ---
 
 ## 9. Future Improvements
@@ -229,3 +244,10 @@ terraform apply
 - Add Network Firewall for centralized egress filtering
 - Add Transit Gateway Network Manager for global monitoring
 - SCPs for multi-account setups
+
+### Comments:
+
+- Integrations with external services such as Splunk, Datadog, or FortiWeb will be addressed in other projects.
+- Resources such as AWS Shield Advanced were not considered due to their high cost for testing (USD 3,000/month).
+- This project focuses primarily on network security in AWS, so several other security services were left out. You can check my other security projects to get a more holistic view of security in AWS. Here are some of them:
+  - [Securing a 3-tier application](https://github.com/victorhponcec/portfolio-aws-security-1/blob/main/README.md)
