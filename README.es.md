@@ -239,7 +239,7 @@ terraform init
 terraform plan
 terraform apply
 ```
-*deben reemplazar variables relevantes tales cómo el nombre de dominio desde variables.tf
+Se deben reemplazar variables relevantes tales cómo el nombre de dominio desde variables.tf
 
 ---
 

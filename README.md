@@ -236,7 +236,8 @@ terraform plan
 terraform apply
 ```
 
-*replace relevant variables like (domain) in variables.tf
+Make sure to replace relevant variables like "domain" in variables.tf
+
 ---
 
 ## 9. Future Improvements
